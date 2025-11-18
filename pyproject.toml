@@ -1,7 +1,7 @@
 [project]
-name = "fast-api-contact"
+name = "Library Management System"
 version = "0.1.0"
-description = "Add your description here"
+description = "An API service to demonstrate Library Management System API capabilities."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
