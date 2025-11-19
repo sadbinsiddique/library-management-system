@@ -33,13 +33,13 @@ A comprehensive API service for Library Management System with Book Management, 
 .venv\Scripts\activate
 ```
 
-### 2. API
+### 2. Server
 
 ```bash
 python main.py
 ```
 
-### 3. Console
+### 3. Client
 
 ```bash
 python api_client.py
@@ -48,19 +48,21 @@ python api_client.py
 ## Project Tree
 
 ```bash
-├──server
-│    ├───api_book_management
-│    ├───api_user_management
-│    ├───api_borrow_return_system
-│    ├───api_report_admin_system
-│    └───app
-│
-├──client
-│    ├───book_management
-│    ├───user_management
-│    ├───borrow_return_system
-│    ├───report_admin_system
-│    └───app
-│
+library-management-system
+│    │
+│    ├──server
+│    │    ├───api_book_management
+│    │    ├───api_user_management
+│    │    ├───api_borrow_return_system
+│    │    ├───api_report_admin_system
+│    │    └───api
+│    │
+│    └───client
+│         ├───book_management
+│         ├───user_management
+│         ├───borrow_return_system
+│         ├───report_admin_system
+│         └───client
+│    
 └───main
 ```
