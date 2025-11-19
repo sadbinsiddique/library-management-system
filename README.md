@@ -27,14 +27,40 @@ A comprehensive API service for Library Management System with Book Management, 
 
 ## Services
 
-### API
+### 1. Virtual Enviroment
 
 ```bash
-uvicorn api_server:app --reload
+.venv\Scripts\activate
 ```
 
-### Console
+### 2. API
+
+```bash
+python main.py
+```
+
+### 3. Console
 
 ```bash
 python api_client.py
+```
+
+## Project Tree
+
+```bash
+├──server
+│    ├───api_book_management
+│    ├───api_user_management
+│    ├───api_borrow_return_system
+│    ├───api_report_admin_system
+│    └───app
+│
+├──client
+│    ├───book_management
+│    ├───user_management
+│    ├───borrow_return_system
+│    ├───report_admin_system
+│    └───app
+│
+└───main
 ```
