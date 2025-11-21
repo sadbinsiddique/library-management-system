@@ -98,7 +98,7 @@ if __name__ == "__main__":
                 book_id = input("Book ID: ")
                 updated = client.update_book(
                     book_id,
-                    title=prompt("Title (or Enter to skip): "),
+                    title=prompt("Title: "),
                     author=prompt("Author: "),
                     isbn=prompt("ISBN: "),
                     published_year=prompt("Year: ", int),
@@ -110,7 +110,7 @@ if __name__ == "__main__":
                 client.delete_book(input("Book ID: "))
                 print("Deleted successfully!")
                 
-            input("\nPress Enter to continue...")
+            input("\nPress Enter to continue... ")
         except Exception as e:
-            print(f"Error: {e}")
-            input("\nPress Enter to continue...")
+            print(f"{e}")
+            input("\nPress Enter to continue... ")
