@@ -128,11 +128,11 @@ async def update_book(
     book_db[book_id] = book.model_dump()
     return book_db[book_id]
 
-@app.delete("/{book_id}", status_code=200)
+@app.delete("/{book_id}", status_code=204)
 async def delete_book(
     book_id: int = Path(..., description="The ID of the book to delete")
 ):
     if book_id not in book_db:
         raise HTTPException(status_code=404, detail="Book not found")
     del book_db[book_id]
-    return {"message": "Book deleted successfully", "book_id": book_id}
+    return None

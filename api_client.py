@@ -86,7 +86,7 @@ def menu():
 def main():
     while True:
         menu()
-        choice = input("Enter your choice (1-4): ").strip()
+        choice = input("Enter your choice (1-6): ").strip()
         
         if choice == "1":
             call_square_root()
@@ -102,7 +102,7 @@ def main():
             print("Exiting program. Goodbye!")
             break
         else:
-            print("Invalid option. Please choose between 1 and 4.")
+            print("Invalid option. Please choose between 1 and 6.")
 
 if __name__ == "__main__":
     main()

@@ -92,11 +92,11 @@ async def update_user(
     user_db[user_id] = user.model_dump()
     return user_db[user_id]
 
-@app.delete("/{user_id}", response_model=UserModel, status_code=200)
+@app.delete("/{user_id}", status_code=204)
 async def delete_user(
     user_id: int = Path(..., description="The ID of the user to delete")
 ):
     if user_id not in user_db:
         raise HTTPException(status_code=404, detail="User not found")
-    deleted_user = user_db.pop(user_id)
-    return deleted_user
+    del user_db[user_id]
+    return None
