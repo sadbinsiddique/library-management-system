@@ -1,102 +1,195 @@
+# file: server/api_user_management.py
 from fastapi import FastAPI, Query, Path, HTTPException
 from pydantic import BaseModel
+import os
 
 app = FastAPI()
-
-user_db = {
-    1: {
-        "username": "john_doe",
-        "full_name": "John Doe",
-        "email": "john.doe@example.com"
-    },
-    2: {
-        "username": "jane_smith",
-        "full_name": "Jane Smith",
-        "email": "jane.smith@example.com"
-    },
-    3: {
-        "username": "alice_wong",
-        "full_name": "Alice Wong",
-        "email": "alice.wong@example.com"
-    },
-    4: {
-        "username": "bob_jackson",
-        "full_name": "Bob Jackson",
-        "email": "bob.jackson@example.com"
-    },
-    5: {
-        "username": "carla_martin",
-        "full_name": "Carla Martin",
-        "email": "carla.martin@example.com"
-    },
-    6: {
-        "username": "daniel_lee",
-        "full_name": "Daniel Lee",
-        "email": "daniel.lee@example.com"
-    },
-    7: {
-        "username": "emma_green",
-        "full_name": "Emma Green",
-        "email": "emma.green@example.com"
-    },
-    8: {
-        "username": "frank_hill",
-        "full_name": "Frank Hill",
-        "email": "frank.hill@example.com"
-    },
-    9: {
-        "username": "grace_kim",
-        "full_name": "Grace Kim",
-        "email": "grace.kim@example.com"
-    },
-    10: {
-        "username": "henry_clark",
-        "full_name": "Henry Clark",
-        "email": "henry.clark@example.com"
-    }
-}
 
 class UserModel(BaseModel):
     username: str
     full_name: str
     email: str
 
+class UserUpdate(BaseModel):
+    username: str = None
+    full_name: str = None
+    email: str = None
+
+USERS_FILE = "database/users.txt"
+
+def ensure_database_directory():
+    os.makedirs("database", exist_ok=True)
+    if not os.path.exists(USERS_FILE):
+        with open(USERS_FILE, 'w') as f:
+            pass
+
+def get_next_user_id():
+    ensure_database_directory()
+    max_id = 0
+    
+    if os.path.exists(USERS_FILE):
+        with open(USERS_FILE, 'r') as f:
+            for line in f:
+                if line.strip():
+                    user_id = int(line.split('|')[0])
+                    max_id = max(max_id, user_id)
+    
+    return max_id + 1
+
 @app.get("/", response_model=dict, status_code=200)
 async def get_all_users():
-    return {"users": user_db}
+    ensure_database_directory()
+    users = {}
+    
+    if os.path.exists(USERS_FILE):
+        with open(USERS_FILE, 'r') as f:
+            for line in f:
+                if line.strip():
+                    parts = line.strip().split('|')
+                    user_id = parts[0]
+                    users[user_id] = {
+                        "username": parts[1],
+                        "full_name": parts[2],
+                        "email": parts[3]
+                    }
+    
+    return users
 
-@app.post("/", response_model=UserModel, status_code=201)
+@app.post("/", response_model=dict, status_code=201)
 async def add_user(user: UserModel):
-    for existing in user_db.values():
-        if existing.get("email") == user.email:
-            raise HTTPException(status_code=400, detail="Email already exists")
-    new_id = max(user_db.keys()) + 1 if user_db else 1
-    user_data = user.model_dump()
-    user_db[new_id] = user_data
-    return user_db[new_id]
+    ensure_database_directory()
+    
+    # checking if username already exists
+    if os.path.exists(USERS_FILE):
+        with open(USERS_FILE, 'r') as f:
+            for line in f:
+                if line.strip():
+                    parts = line.strip().split('|')
 
-@app.get("/{user_id}", response_model=UserModel, status_code=200)
-async def get_user_by_id(
-    user_id: int = Path(..., description="The ID of the user to retrieve")
-):
-    if user_id not in user_db:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user_db[user_id]
+                    if parts[1] == user.username:
+                        raise HTTPException(
+                            status_code=409, 
+                            detail="\n ------- Username already exists ------- \n"
+                        )
+    
+    new_id = get_next_user_id()
+    
+    with open(USERS_FILE, 'a') as f:
+        user_data = f"{new_id}|{user.username}|{user.full_name}|{user.email}\n"
+        f.write(user_data)
+    
+    return {
+        "id": new_id,
+        "username": user.username,
+        "full_name": user.full_name,
+        "email": user.email
+    }
 
-@app.put("/{user_id}", response_model=UserModel, status_code=200)
-async def update_user(
-    user: UserModel, user_id: int = Path(..., description="The ID of the user to update")
-):
-    if user_id not in user_db:
-        raise HTTPException(status_code=404, detail="User not found")
-    user_db[user_id] = user.model_dump()
-    return user_db[user_id]
+@app.get("/{user_id}", response_model=dict, status_code=200)
+async def get_user_by_id(user_id: int):
+    ensure_database_directory()
+    
+    if not os.path.exists(USERS_FILE):
+        raise HTTPException(
+            status_code=404, 
+            detail="\n ------ User not found ------ \n"
+        )
+    
+    with open(USERS_FILE, 'r') as f:
+        for line in f:
+            if line.strip():
+                parts = line.strip().split('|')
+                if int(parts[0]) == user_id:
+                    return {
+                        "id": parts[0],
+                        "username": parts[1],
+                        "full_name": parts[2],
+                        "email": parts[3]
+                    }
+    
+    raise HTTPException(
+        status_code=404, 
+        detail="\n ------- User not found ------- \n"
+    )
+
+@app.put("/{user_id}", response_model=dict, status_code=200)
+async def update_user(user_id: int, user_update: UserUpdate):
+    ensure_database_directory()
+    
+    if not os.path.exists(USERS_FILE):
+        raise HTTPException(
+            status_code=404, 
+            detail="\n ------- User not found ------- \n"
+        )
+    
+    users = []
+    user_found = False
+    updated_user = None
+    
+    with open(USERS_FILE, 'r') as f:
+        for line in f:
+            if line.strip():
+                parts = line.strip().split('|')
+                if int(parts[0]) == user_id:
+                    user_found = True
+                    
+                    # update only the provided fields
+                    username = user_update.username if user_update.username else parts[1]
+                    full_name = user_update.full_name if user_update.full_name else parts[2]
+                    email = user_update.email if user_update.email else parts[3]
+                    
+                    updated_line = f"{parts[0]}|{username}|{full_name}|{email}\n"
+                    users.append(updated_line)
+                    
+                    updated_user = {
+                        "id": parts[0],
+                        "username": username,
+                        "full_name": full_name,
+                        "email": email
+                    }
+                else:
+                    users.append(line)
+    
+    if not user_found:
+        raise HTTPException(
+            status_code=404, 
+            detail="\n ------- User not found ------- \n"
+        )
+    
+    with open(USERS_FILE, 'w') as f:
+        f.writelines(users)
+    
+    return updated_user
 
 @app.delete("/{user_id}", status_code=204)
-async def delete_user(
-    user_id: int = Path(..., description="The ID of the user to delete")
-):
-    if user_id not in user_db:
-        raise HTTPException(status_code=404, detail="User not found")
-    del user_db[user_id]
+async def delete_user(user_id: int):
+    ensure_database_directory()
+    
+    if not os.path.exists(USERS_FILE):
+        raise HTTPException(
+            status_code=404, 
+            detail="\n ------- User not found ------- \n"
+        )
+    
+    users = []
+    user_found = False
+    
+    with open(USERS_FILE, 'r') as f:
+        for line in f:
+            if line.strip():
+                parts = line.strip().split('|')
+                if int(parts[0]) == user_id:
+                    user_found = True
+                else:
+                    users.append(line)
+    
+    if not user_found:
+        raise HTTPException(
+            status_code=404, 
+            detail="\n ------- User not found ------- \n"
+        )
+    
+    with open(USERS_FILE, 'w') as f:
+        f.writelines(users)
+    
     return None
