@@ -1,3 +1,4 @@
+# file: client/client.py
 import os
 import sys
 from book_management import BookManagementClient, print_book
