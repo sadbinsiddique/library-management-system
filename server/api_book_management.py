@@ -1,94 +1,11 @@
+# file: server/api_book_management.py
 from fastapi import FastAPI, Query, Path, HTTPException
 from pydantic import BaseModel
+import os
 
 app = FastAPI()
 
-book_db = {
-    1: {
-        "title": "1984",
-        "author": "George Orwell",
-        "isbn": "9780451524935",
-        "published_year": 1949,
-        "copies_available": 4,
-    },
-    2: {
-        "title": "To Kill a Mockingbird",
-        "author": "Harper Lee",
-        "isbn": "9780060935467",
-        "published_year": 1960,
-        "copies_available": 2,
-    },
-    3: {
-        "title": "The Great Gatsby",
-        "author": "F. Scott Fitzgerald",
-        "isbn": "9780743273565",
-        "published_year": 1925,
-        "copies_available": 5,
-    },
-    4: {
-        "title": "Pride and Prejudice",
-        "author": "Jane Austen",
-        "isbn": "9780141439518",
-        "published_year": 1813,
-        "copies_available": 3,
-    },
-    5: {
-        "title": "The Catcher in the Rye",
-        "author": "J.D. Salinger",
-        "isbn": "9780316769488",
-        "published_year": 1951,
-        "copies_available": 6,
-    },
-    6: {
-        "title": "Moby-Dick",
-        "author": "Herman Melville",
-        "isbn": "9781503280786",
-        "published_year": 1851,
-        "copies_available": 2,
-    },
-    7: {
-        "title": "War and Peace",
-        "author": "Leo Tolstoy",
-        "isbn": "9780199232765",
-        "published_year": 1869,
-        "copies_available": 3,
-    },
-    8: {
-        "title": "The Hobbit",
-        "author": "J.R.R. Tolkien",
-        "isbn": "9780547928227",
-        "published_year": 1937,
-        "copies_available": 5,
-    },
-    9: {
-        "title": "Brave New World",
-        "author": "Aldous Huxley",
-        "isbn": "9780060850524",
-        "published_year": 1932,
-        "copies_available": 4,
-    },
-    10: {
-        "title": "Crime and Punishment",
-        "author": "Fyodor Dostoevsky",
-        "isbn": "9780486415871",
-        "published_year": 1866,
-        "copies_available": 2,
-    },
-    11: {
-        "title": "The Lord of the Rings",
-        "author": "J.R.R. Tolkien",
-        "isbn": "9780261102385",
-        "published_year": 1954,
-        "copies_available": 3,
-    },
-    12: {
-        "title": "Harry Potter and the Philosopher's Stone",
-        "author": "J.K. Rowling",
-        "isbn": "9780747532699",
-        "published_year": 1997,
-        "copies_available": 7,
-    },
-}
+BOOK_FILE = "database/books.txt"
 
 class BookModel(BaseModel):
     title: str
@@ -97,42 +14,194 @@ class BookModel(BaseModel):
     published_year: int
     copies_available: int
 
+class BookUpdate(BaseModel):
+    title: str = None
+    author: str = None
+    isbn: str = None
+    published_year: int = None
+    copies_available: int = None
+
+def ensure_database_directory():
+    os.makedirs("database", exist_ok=True)
+    if not os.path.exists(BOOK_FILE):
+        with open(BOOK_FILE, 'w') as f:
+            pass
+
+def get_next_book_id():
+    ensure_database_directory()
+    max_id = 0
+
+    if os.path.exists(BOOK_FILE):
+        with open(BOOK_FILE, 'r') as f:
+            for line in f:
+                if line.strip():
+                    book_id = int(line.split('|')[0])
+                    max_id = max(max_id, book_id)
+
+    return max_id + 1
+
 @app.get("/", response_model=dict, status_code=200)
 async def get_all_books():
-    return book_db
+    ensure_database_directory()
+    books = {}
 
-@app.post("/", response_model=BookModel, status_code=201)
+    with open(BOOK_FILE, 'r') as f:
+        for line in f:
+            if line.strip():
+                parts = line.strip().split('|')
+                book_id = parts[0]
+                books[book_id] = {
+                    "title": parts[1],
+                    "author": parts[2],
+                    "isbn": parts[3],
+                    "published_year": int(parts[4]),
+                    "copies_available": int(parts[5])
+                }
+
+    return books
+
+@app.post("/", response_model=dict, status_code=201)
 async def add_book(book: BookModel):
-    for existing in book_db.values():
-        if existing.get("isbn") == book.isbn:
-            raise HTTPException(status_code=409, detail="Book already exists")
+    ensure_database_directory()
+    
+    # Check for duplicate ISBN
+    if os.path.exists(BOOK_FILE):
+        with open(BOOK_FILE, 'r') as f:
+            for line in f:
+                if line.strip():
+                    parts = line.strip().split('|')
+                    if parts[3] == book.isbn:
+                        raise HTTPException(
+                            status_code=409, 
+                            detail="\n--------- Book with this ISBN already exists ---------\n"
+                        )
+                    
+    book_id = get_next_book_id()
 
-    new_id = max(book_db.keys()) + 1 if book_db else 1
-    book_db[new_id] = book.model_dump()
-    return book_db[new_id]
+    with open(BOOK_FILE, 'a') as f:
+        book_record = f"{book_id}|{book.title}|{book.author}|{book.isbn}|{book.published_year}|{book.copies_available}\n"
+        f.write(book_record)
+    
+    return {
+        "id": book_id,
+        "title": book.title,
+        "author": book.author,
+        "isbn": book.isbn,
+        "published_year": book.published_year,
+        "copies_available": book.copies_available
+    }
 
-@app.get("/{book_id}", response_model=BookModel, status_code=200)
-async def get_book_by_id(
-    book_id: int = Path(..., description="The ID of the book to retrieve")
-):
-    if book_id not in book_db:
-        raise HTTPException(status_code=404, detail="Book not found")
-    return book_db[book_id]
+@app.get("/{book_id}", response_model=dict, status_code=200)
+async def get_book_by_id(book_id: int):
+    ensure_database_directory()
 
-@app.put("/{book_id}", response_model=BookModel, status_code=200)
-async def update_book(
-    book: BookModel, book_id: int = Path(..., description="The ID of the book to update")
-):
-    if book_id not in book_db:
-        raise HTTPException(status_code=404, detail="Book not found")
-    book_db[book_id] = book.model_dump()
-    return book_db[book_id]
+    if not os.path.exists(BOOK_FILE):
+        raise HTTPException(
+            status_code=404, 
+            detail="\n-------- Book not found --------\n"
+        )
+    
+    with open(BOOK_FILE, 'r') as f:
+        for line in f:
+            if line.strip():
+                parts = line.strip().split('|')
+                if int(parts[0]) == book_id:
+                    return {
+                        "title": parts[1],
+                        "author": parts[2],
+                        "isbn": parts[3],
+                        "published_year": int(parts[4]),
+                        "copies_available": int(parts[5])
+                    }
+                
+    raise HTTPException(
+        status_code=404, 
+        detail="\n-------- Book not found --------\n"
+    )
+
+@app.put("/{book_id}", response_model=dict, status_code=200)
+async def update_book_by_id(book_id: int, book_update: BookUpdate):
+    ensure_database_directory()
+    
+    books = []
+    book_found = False
+    updated_book = None
+
+    if not os.path.exists(BOOK_FILE):
+        raise HTTPException(
+            status_code=404, 
+            detail="\n-------- Book not found --------\n"
+        )
+
+    with open(BOOK_FILE, 'r') as f:
+        for line in f:
+            if line.strip():
+                parts = line.strip().split('|')
+
+                if int(parts[0]) == book_id:
+                    book_found = True
+
+                    # update only the provided fields
+                    title = book_update.title if book_update.title is not None else parts[1]
+                    author = book_update.author if book_update.author is not None else parts[2]
+                    isbn = book_update.isbn if book_update.isbn is not None else parts[3]
+                    published_year = book_update.published_year if book_update.published_year is not None else int(parts[4])
+                    copies_available = book_update.copies_available if book_update.copies_available is not None else int(parts[5])
+
+                    updated_line = f"{book_id}|{title}|{author}|{isbn}|{published_year}|{copies_available}\n"
+                    books.append(updated_line)
+
+                    updated_book = {
+                        "title": title,
+                        "author": author,
+                        "isbn": isbn,
+                        "published_year": published_year,
+                        "copies_available": copies_available
+                    }
+                else:
+                    books.append(line)
+
+    if not book_found:
+        raise HTTPException(
+            status_code=404, 
+            detail="\n-------- Book not found --------\n"
+        )
+
+    with open(BOOK_FILE, 'w') as f:
+        f.writelines(books)
+
+    return updated_book
 
 @app.delete("/{book_id}", status_code=204)
-async def delete_book(
-    book_id: int = Path(..., description="The ID of the book to delete")
-):
-    if book_id not in book_db:
-        raise HTTPException(status_code=404, detail="Book not found")
-    del book_db[book_id]
+async def delete_book(book_id: int):
+    ensure_database_directory()
+    
+    books = []
+    book_found = False
+
+    if not os.path.exists(BOOK_FILE):
+        raise HTTPException(
+            status_code=404, 
+            detail="\n-------- Book not found --------\n"
+        )
+
+    with open(BOOK_FILE, 'r') as f:
+        for line in f:
+            if line.strip():
+                parts = line.strip().split('|')
+
+                if int(parts[0]) == book_id:
+                    book_found = True
+                else:
+                    books.append(line)
+
+    if not book_found:
+        raise HTTPException(
+            status_code=404, 
+            detail="\n-------- Book not found --------\n"
+        )
+
+    with open(BOOK_FILE, 'w') as f:
+        f.writelines(books)
+
     return None
