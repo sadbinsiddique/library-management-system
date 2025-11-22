@@ -25,10 +25,31 @@ A comprehensive API service for Library Management System with Book Management, 
 
 ## Services
 
-### 1. Virtual Enviroment
+### 1. Virtual Environment
+
+Create the virtual environment:
 
 ```bash
+# Use `python` or `python3` as appropriate
+python -m venv .venv
+```
+
+Activate
+
+- Windows (cmd.exe)
+```cmd
 .venv\Scripts\activate
+```
+
+- Linux / macOS / WSL / Git Bash
+```bash
+source .venv/bin/activate
+```
+
+Deactivate
+
+```bash
+deactivate
 ```
 
 ### 2. Server
@@ -40,7 +61,8 @@ python main.py
 ### 3. Client
 
 ```bash
-python api_client.py
+cd client
+python client.py
 ```
 
 ## Project Tree
