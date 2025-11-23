@@ -14,7 +14,8 @@ class BookModel(BaseModel):
     published_year: int
     copies_available: int
 
-class BookUpdate(BaseModel):
+# Update Base Model (BUG)
+class BookUpdate(BaseModel): 
     title: str = None
     author: str = None
     isbn: str = None
