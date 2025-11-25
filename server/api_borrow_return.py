@@ -265,7 +265,7 @@ async def check_book_availability(book_id: int):
     book = get_book(book_id)
     if not book:
         raise HTTPException(
-            status_code=404, 
+            status_code = 404, 
             detail=f"\n ------ Book with ID {book_id} not found ------ \n"
         )
 
