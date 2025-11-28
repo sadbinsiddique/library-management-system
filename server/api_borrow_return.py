@@ -99,21 +99,21 @@ async def borrow_book(request: BorrowRequest):
 
     if not user_exists(request.user_id):
         raise HTTPException(
-            status_code=404, 
-            detail= f"\n ------ User with ID {request.user_id} not found ------ \n"
+            status_code = 404, 
+            detail = f"\n ------ User with ID {request.user_id} not found ------ \n"
         )
 
     book = get_book(request.book_id)
     if not book:
         raise HTTPException(
             status_code=404, 
-            detail=f"\n ------ Book with ID {request.book_id} not found ------ \n"
+            detail = f"\n ------ Book with ID {request.book_id} not found ------ \n"
         )
     
     if book['available_copies'] <= 0:
         raise HTTPException(
-            status_code=400, 
-            detail=f"\n ------ No available copies for Book ID {request.book_id} (All copies are borrowed) ------ \n"
+            status_code =400, 
+            detail = f"\n ------ No available copies for Book ID {request.book_id} (All copies are borrowed) ------ \n"
         )
 
     borrow_id = get_next_borrow_id()
@@ -148,7 +148,7 @@ async def return_book(request: ReturnRequest):
     if not os.path.exists(BORROWS_FILE):
         raise HTTPException(
             status_code=404, 
-            detail=f"\n ------ No borrow records found ------ \n"
+            detail = f"\n ------ No borrow records found ------ \n"
         )
 
     with open(BORROWS_FILE, 'r') as f:
@@ -158,8 +158,8 @@ async def return_book(request: ReturnRequest):
                 if int(parts[0]) == request.borrow_id:
                     if parts[6] == "returned":
                         raise HTTPException(
-                            status_code=400, 
-                            detail=f"\n ------ Borrow record with ID {request.borrow_id} has already been returned ------ \n"
+                            status_code = 400, 
+                            detail =f"\n ------ Borrow record with ID {request.borrow_id} has already been returned ------ \n"
                         )
                     
                     borrow_found = True
@@ -183,8 +183,8 @@ async def return_book(request: ReturnRequest):
 
     if not borrow_found:
         raise HTTPException(
-            status_code=404, 
-            detail=f"\n ------ Borrow record with ID {request.borrow_id} not found or already returned ------ \n"
+            status_code =404, 
+            detail = f"\n ------ Borrow record with ID {request.borrow_id} not found or already returned ------ \n"
         )
 
     with open(BORROWS_FILE, 'w') as f:
@@ -195,14 +195,14 @@ async def return_book(request: ReturnRequest):
         "message": f"\n ------ Borrow record ID {request.borrow_id} successfully returned ------ \n"
     }
 
-@app.get("/track/{user_id}", response_model=dict, status_code=200)
+@app.get("/track/{user_id}", response_model =dict, status_code=200)
 async def track_user_borrows(user_id: int):
     ensure_database_directory()
 
     if not user_exists(user_id):
         raise HTTPException(
-            status_code=404, 
-            detail=f"\n ------ User with ID {user_id} not found ------ \n"
+            status_code = 404, 
+            detail = f"\n ------ User with ID {user_id} not found ------ \n"
         )
 
     user_borrows = []
@@ -230,7 +230,7 @@ async def track_user_borrows(user_id: int):
         "borrows": user_borrows
     }
 
-@app.get("/borrowed-books", response_model=dict, status_code=200)
+@app.get("/borrowed-books", response_model = dict, status_code=200)
 async def get_all_borrowed_books():
     ensure_database_directory()
 
@@ -265,8 +265,8 @@ async def check_book_availability(book_id: int):
     book = get_book(book_id)
     if not book:
         raise HTTPException(
-            status_code=404, 
-            detail=f"\n ------ Book with ID {book_id} not found ------ \n"
+            status_code = 404, 
+            detail = f"\n ------ Book with ID {book_id} not found ------ \n"
         )
 
     is_available = book['available_copies'] > 0
