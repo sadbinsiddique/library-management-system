@@ -4,6 +4,7 @@ import sys
 from book_management import BookManagementClient, print_book
 from user_management import UserManagementClient, print_user
 from borrow_return import BorrowReturnClient, print_borrow, print_availability
+from admin import AdminClient, print_summary, print_full_report, print_books_report, print_users_report, print_borrows_report
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -544,6 +545,91 @@ def borrow_return_menu():
             print(f"Error: {e}")
             input("\nPress Enter to continue... ")
 
+def admin_reports_menu():
+    client = AdminClient("http://127.0.0.1:8000/admin")
+    
+    while True:
+        clear_screen()
+        print("\n╔════════════════════════════════════╗")
+        print("║  Admin Reports & Analytics         ║")
+        print("╚════════════════════════════════════╝")
+        print("1. View Complete Report (All Data)")
+        print("2. View Summary Only")
+        print("3. View Books Report")
+        print("4. View Users Report")
+        print("5. View Borrows Report")
+        print("b. Back to Main Menu\n")
+        
+        cmd = input("Choice: ").strip().lower()
+        
+        if cmd == 'b':
+            break
+            
+        try:
+            if cmd == '1':
+                try:
+                    report = client.get_all_reports()
+                    print_full_report(report)
+                except Exception as e:
+                    print(f"\nError: Failed to retrieve complete report.")
+                    print(f"Details: {e}")
+                    
+            elif cmd == '2':
+                try:
+                    report = client.get_all_reports()
+                    if report and 'summary' in report:
+                        print_summary(report['summary'])
+                    else:
+                        print("\nNo summary data available.")
+                except Exception as e:
+                    print(f"\nError: Failed to retrieve summary.")
+                    print(f"Details: {e}")
+                    
+            elif cmd == '3':
+                try:
+                    report = client.get_all_reports()
+                    if report and 'books' in report:
+                        print_books_report(report['books'])
+                    else:
+                        print("\nNo books data available.")
+                except Exception as e:
+                    print(f"\nError: Failed to retrieve books report.")
+                    print(f"Details: {e}")
+                    
+            elif cmd == '4':
+                try:
+                    report = client.get_all_reports()
+                    if report and 'users' in report:
+                        print_users_report(report['users'])
+                    else:
+                        print("\nNo users data available.")
+                except Exception as e:
+                    print(f"\nError: Failed to retrieve users report.")
+                    print(f"Details: {e}")
+                    
+            elif cmd == '5':
+                try:
+                    report = client.get_all_reports()
+                    if report and 'borrows' in report:
+                        print_borrows_report(report['borrows'])
+                    else:
+                        print("\nNo borrows data available.")
+                except Exception as e:
+                    print(f"\nError: Failed to retrieve borrows report.")
+                    print(f"Details: {e}")
+            
+            else:
+                print("\nInvalid choice! Please select a valid option.")
+                
+            input("\nPress Enter to continue... ")
+            
+        except KeyboardInterrupt:
+            print("\n\nOperation cancelled.")
+            input("\nPress Enter to continue... ")
+        except Exception as e:
+            print(f"\nUnexpected error: {e}")
+            input("\nPress Enter to continue... ")
+
 def main_menu():
     while True:
         clear_screen()
@@ -553,6 +639,7 @@ def main_menu():
         print("\n1. Book Management")
         print("2. User Management")
         print("3. Borrow & Return System")
+        print("4. Admin Reports & Analytics")
         print("q. Quit\n")
         
         choice = input("Select Option: ").strip().lower()
@@ -566,6 +653,8 @@ def main_menu():
             user_management_menu()
         elif choice == '3':
             borrow_return_menu()
+        elif choice == '4':
+            admin_reports_menu()
         else:
             print("Invalid choice. Please try again.")
             input("\nPress Enter to continue... ")
