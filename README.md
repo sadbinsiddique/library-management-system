@@ -20,7 +20,7 @@ A comprehensive API service for Library Management System with Book Management, 
 | --- | --- | --- | --- | --- | --- |
 | [Book Management](http://127.0.0.1:8000/book/docs) | Add  book | Update book | Delete book | List Books | Search book by Id |
 | [User Management](http://127.0.0.1:8000/user/docs) | Add  User | Update User | Delete User | List Users | Search User by Id |
-| [Borrow & Return System](http://127.0.0.1:8000/borrow/docs) | Borrow book | Return book | Track Users Borrowed Books | List all borrowed books | Check book availability
+| [Borrow & Return System](http://127.0.0.1:8000/borrow/docs) | Borrow book | Return book | Track Users Borrowed Books | List all borrowed books | Check book availability |
 | [Reports & Admin](http://127.0.0.1:8000/admin/docs) | View Complete System Report | View Summary Statistics | View Overdue Books | View Most Borrowed Books | View User-Specific Borrowing History |
 
 ## Services
@@ -42,6 +42,7 @@ Activate
 ```
 
 - Linux / macOS / WSL / Git Bash
+
 ```bash
 source .venv/bin/activate
 ```
