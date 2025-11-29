@@ -14,3 +14,37 @@
 14|Beneath the Meridian|Kei Tanaka|9780451494036|1992|5
 15|Salt and Signal|Alvarez|9780593070953|2021|3
 16|xsdcfrwed|sdfe|1235678654323|1212|3
+17|Harbor of Sparks|Lila Arden|9780307598427|2014|4
+18|The Copper Atlas|Hugo Mercer|9780593071967|2001|2
+19|Echoes of Ash|Serena Vale|9780525555530|2016|5
+20|Velvet Geometry|Isa Noor|9780062443028|2012|3
+21|Lantern of Glass|Milo Crane|9780671031235|2005|4
+22|Fractured Compass|Nadia Wolfe|9780525951899|2010|2
+23|Mariner’s Cipher|Elias Dune|9781250145120|2018|5
+24|Petal Circuit|Rowan Hale|9780452296813|1999|3
+25|Ironbay Memorandum|Clarke Rhee|9780316087453|2003|4
+26|Inland Zephyr|Tara Qadir|9781982102375|2022|6
+27|Atlas of Hollow Suns|Rey Calder|9781250319323|2015|2
+28|Midnight Tailor|Greta Sol|9780345537454|2007|5
+29|Signal Harbor|Owen Pike|9780307465316|2008|3
+30|The Quiet Meridian|Noor Hassan|9780385528747|2011|4
+31|Ivory Labyrinth|Mei Laurent|9781400067488|2013|5
+32|Paperbound Nebula|Jon Calderon|9781250193527|2020|3
+33|Garden of Static|Ines Navarro|9780553418424|2002|2
+34|The Orphan Cartographer|Marta Wynn|9781101986352|1996|4
+35|Forest of Lenses|Kai Romero|9780143127894|2019|5
+36|Driftglass Archive|Liam Sato|9780451490969|2004|3
+37|Aurora Knots|Zadie Karim|9780525428858|2017|2
+38|Hearthline Protocol|Jasper Reed|9780062443066|2015|4
+39|The Luminous Ledger|Priya Desai|9780385544105|2021|6
+40|Rivers of Cipher|Noam Teller|9780316349179|1998|3
+41|Bramble Constellation|Ari Vega|9780593231244|2006|4
+42|Copperwing Sonata|Helena Brynn|9780385351390|2010|2
+43|Veil of Bearings|Soren Malik|9780316383937|2013|5
+44|Nightingale Array|Celia Morton|9781476757839|2018|3
+45|Signal in Amber|Dev Patel|9780062457735|2022|4
+46|The Lantern Archivist|Hana Ortiz|9780525559477|2016|5
+47|Afterglow Harbor|Julian Ness|9780399592521|2009|2
+48|Winterline Equation|Maris Chen|9780451492314|2014|4
+49|Museum of Tides|Ivo Sterling|9780062315011|2001|3
+50|Pale Meridian|Silas Ocampo|9780525429763|1995|4
