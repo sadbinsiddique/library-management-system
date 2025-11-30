@@ -57,3 +57,33 @@ python main.py
 ```cmd
 python client/client.py
 ```
+
+### 5. Build Single EXE (Windows)
+
+Build a one-file Windows executable with PyInstaller.
+
+Prerequisites:
+
+- Python on PATH
+- Dependencies installed: `pip install -r requirements.txt`
+
+Quick build (cmd.exe):
+
+```cmd
+build.bat
+```
+
+This creates `dist\library-management-system.exe`.
+
+Manual command if preferred:
+
+```cmd
+pip install pyinstaller
+pyinstaller --noconfirm --clean --onefile --name library-management-system --add-data "database;database" main.py
+```
+
+Notes:
+
+- Data files from `database/` are bundled and discovered at runtime (handled in `helpers/paths.py`).
+- Uvicorn reload is disabled inside the EXE to avoid watcher/spawn issues.
+- When running as an EXE, data is stored under `%LOCALAPPDATA%\library-management-system\database` so changes persist across runs.
