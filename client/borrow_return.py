@@ -37,4 +37,4 @@ class BorrowReturnClient:
         return self._request('GET', f'/check-availability/{book_id}')
 
 def print_borrow(borrow):
-    print(f"Borrow ID: {borrow.get('borrow_id')} User ID: {borrow.get('user_id')} Book ID: {borrow.get('book_id')} Borrow Date: {borrow.get('borrow_date')} Due Date: {borrow.get('due_date')} Return Date: {borrow.get('return_date')} Status: {borrow.get('status')}")
+    print(f"Borrow ID: {borrow.get('borrow_id')} | User ID: {borrow.get('user_id')} | Book ID: {borrow.get('book_id')} | Borrow Date: {borrow.get('borrow_date')} | Due Date: {borrow.get('due_date')} | Return Date: {borrow.get('return_date')} | Status: {borrow.get('status')}")
