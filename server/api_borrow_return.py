@@ -1,70 +1,122 @@
-from fastapi import FastAPI, Query, Path, HTTPException
-from .api_book_management import book_db
-from .api_user_management import user_db
+from fastapi import FastAPI, HTTPException, Path
 from pydantic import BaseModel
-from typing import List
+from datetime import datetime, timedelta
+from helpers.read_db import load_books, load_users, load_borrows
+from helpers.write_db import write_records
+from helpers.paths import BOOKS_FILE, BORROWS_FILE
 
-
-app = FastAPI(title="Borrow & Return System")
-
-borrow_book_db = []
+app = FastAPI()
 
 class BorrowReturnModel(BaseModel):
+    borrow_id: int | None = None
     user_id: int
     book_id: int
-    date: str # YYYY-MM-DD format
+    borrow_date: str | None = None
+    due_date: str | None = None
+    return_date: str | None = None
+    status: str | None = "borrowed"
 
-@app.post("/", response_model=BorrowReturnModel, status_code=201)
+book_db = {book['id']: book for book in load_books()}
+user_db = {user['id']: user for user in load_users()}
+borrow_db = {borrow['borrow_id']: borrow for borrow in load_borrows()}
+
+def get_next_borrow_id():
+    return max(borrow_db.keys(), default=0) + 1
+
+def update_book_copies(book_id: int, change: int):
+    if book_id not in book_db:
+        return False
+    book_db[book_id]['available_copies'] += change
+    rows = [
+        f"{b['id']}|{b['title']}|{b['author']}|{b['isbn']}|{b['published_year']}|{b['available_copies']}"
+        for b in book_db.values()
+    ]
+    write_records(BOOKS_FILE, rows)
+    return True
+
+def persist_borrows():
+    rows = [
+        f"{b['borrow_id']}|{b['user_id']}|{b['book_id']}|{b['borrow_date']}|{b['due_date']}|{b['return_date'] or ''}|{b['status']}"
+        for b in borrow_db.values()
+    ]
+    write_records(BORROWS_FILE, rows)
+
+@app.post("/", response_model=BorrowReturnModel, status_code=201, description="Borrow a book")
 async def borrow_book(record: BorrowReturnModel):
-    # Validate user exists
     if record.user_id not in user_db:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    # Validate book exists
+        raise HTTPException(status_code=404, detail="Not Found")
     if record.book_id not in book_db:
-        raise HTTPException(status_code=404, detail="Book not found")
+        raise HTTPException(status_code=404, detail="Not Found")
     
-    # Check if already borrowed
-    for existing in borrow_book_db:
-        if existing.user_id == record.user_id and existing.book_id == record.book_id:
-            raise HTTPException(status_code=409, detail="Book already borrowed by user")
+    book = book_db[record.book_id]
+    if book['available_copies'] <= 0:
+        raise HTTPException(status_code=400, detail="Bad Request")
     
-    if book_db[record.book_id].get("copies_available", 0) < 1:
-        raise HTTPException(status_code=400, detail="Not enough copies available")
+    for b in borrow_db.values():
+        if b['user_id'] == record.user_id and b['book_id'] == record.book_id and b['status'] == "borrowed":
+            raise HTTPException(status_code=409, detail="Conflict")
     
-    book_db[record.book_id]["copies_available"] -= 1
-    borrow_book_db.append(record)
-    return record
+    borrow_id = get_next_borrow_id()
+    borrow_date = datetime.now().strftime("%Y-%m-%d")
+    due_date = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
+    
+    borrow_record = {
+        "borrow_id": borrow_id,
+        "user_id": record.user_id,
+        "book_id": record.book_id,
+        "borrow_date": borrow_date,
+        "due_date": due_date,
+        "return_date": None,
+        "status": "borrowed"
+    }
+    
+    borrow_db[borrow_id] = borrow_record
+    update_book_copies(record.book_id, -1)
+    persist_borrows()
+    
+    return BorrowReturnModel(**borrow_record)
 
-@app.delete("/return", response_model=BorrowReturnModel, status_code=200)
+@app.post("/return", response_model=BorrowReturnModel, status_code=200, description="Return a book")
 async def return_book(record: BorrowReturnModel):
-    # Validate book exists
-    if record.book_id not in book_db:
-        raise HTTPException(status_code=404, detail="Book not found")
     
-    for existing in borrow_book_db:
-        if existing.user_id == record.user_id and existing.book_id == record.book_id:
-            book_db[record.book_id]["copies_available"] += 1
-            borrow_book_db.remove(existing)
-            return record
+    for b in borrow_db.values():
+        if b['user_id'] == record.user_id and b['book_id'] == record.book_id and b['status'] == "borrowed":
+            b['status'] = "returned"
+            b['return_date'] = datetime.now().strftime("%Y-%m-%d")
+            update_book_copies(b['book_id'], 1)
+            persist_borrows()
+            return BorrowReturnModel(**b)
     
-    raise HTTPException(status_code=404, detail="Borrow record not found")
+    raise HTTPException(status_code=404, detail="Not Found")
 
-@app.get("/", response_model=List[BorrowReturnModel])
+@app.get("/", response_model=list[BorrowReturnModel], status_code=200, description="List all borrow records")
 async def list_borrows():
-    return borrow_book_db
+    return [BorrowReturnModel(**b) for b in borrow_db.values()]
 
-@app.get("/user/{user_id}", response_model=List[BorrowReturnModel])
+@app.get("/user/{user_id}", response_model=list[BorrowReturnModel], status_code=200, description="List borrow records by user")
 async def borrows_by_user(user_id: int = Path(..., ge=1)):
-    return [r for r in borrow_book_db if r.user_id == user_id]
+    return [BorrowReturnModel(**b) for b in borrow_db.values() if b['user_id'] == user_id]
 
-@app.get("/book/{book_id}", response_model=List[BorrowReturnModel])
+@app.get("/book/{book_id}", response_model=list[BorrowReturnModel], status_code=200, description="List borrow records by book")
 async def borrows_by_book(book_id: int = Path(..., ge=1)):
-    return [r for r in borrow_book_db if r.book_id == book_id]
+    return [BorrowReturnModel(**b) for b in borrow_db.values() if b['book_id'] == book_id]
 
-@app.get("/user/{user_id}/book/{book_id}", response_model=BorrowReturnModel)
+@app.get("/user/{user_id}/book/{book_id}", response_model=BorrowReturnModel, status_code=200, description="Get borrow record by user and book")
 async def get_borrow_record(user_id: int = Path(..., ge=1), book_id: int = Path(..., ge=1)):
-    for r in borrow_book_db:
-        if r.user_id == user_id and r.book_id == book_id:
-            return r
-    raise HTTPException(status_code=404, detail="Borrow record not found")
+    for b in borrow_db.values():
+        if b['user_id'] == user_id and b['book_id'] == book_id:
+            return BorrowReturnModel(**b)
+    raise HTTPException(status_code=404, detail="Not Found")
+
+@app.get("/check-availability/{book_id}", status_code=200, description="Check if a book is available")
+async def check_book_availability(book_id: int = Path(..., ge=1)):
+    if book_id not in book_db:
+        raise HTTPException(status_code=404, detail="Not Found")
+    
+    book = book_db[book_id]
+    return {
+        "book_id": book_id,
+        "title": book["title"],
+        "available_copies": book["available_copies"],
+        "is_available": book["available_copies"] > 0
+    }

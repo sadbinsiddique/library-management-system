@@ -1,11 +1,11 @@
 [project]
-name = "Library-Management-System"
-version = "2.1.0"
-description = "A comprehensive API service for Library Management System with Book Management, User Management, Borrow & Return System and Reports features."
+name = "library-management-system"
+version = "2.5.0"
+description = "A comprehensive API service for Library Management System with Book Management, User Management, Borrow & Return System and Reports features"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.13"
 dependencies = [
-    "fastapi[standard]>=0.121.2",
+    "fastapi>=0.123.0",
     "requests>=2.32.5",
     "uvicorn>=0.38.0",
 ]

@@ -1,138 +1,82 @@
 from fastapi import FastAPI, Query, Path, HTTPException
 from pydantic import BaseModel
+from helpers.paths import BOOKS_FILE
+from helpers.read_db import load_books
+from helpers.write_db import write_records
 
 app = FastAPI()
 
-book_db = {
-    1: {
-        "title": "1984",
-        "author": "George Orwell",
-        "isbn": "9780451524935",
-        "published_year": 1949,
-        "copies_available": 4,
-    },
-    2: {
-        "title": "To Kill a Mockingbird",
-        "author": "Harper Lee",
-        "isbn": "9780060935467",
-        "published_year": 1960,
-        "copies_available": 2,
-    },
-    3: {
-        "title": "The Great Gatsby",
-        "author": "F. Scott Fitzgerald",
-        "isbn": "9780743273565",
-        "published_year": 1925,
-        "copies_available": 5,
-    },
-    4: {
-        "title": "Pride and Prejudice",
-        "author": "Jane Austen",
-        "isbn": "9780141439518",
-        "published_year": 1813,
-        "copies_available": 3,
-    },
-    5: {
-        "title": "The Catcher in the Rye",
-        "author": "J.D. Salinger",
-        "isbn": "9780316769488",
-        "published_year": 1951,
-        "copies_available": 6,
-    },
-    6: {
-        "title": "Moby-Dick",
-        "author": "Herman Melville",
-        "isbn": "9781503280786",
-        "published_year": 1851,
-        "copies_available": 2,
-    },
-    7: {
-        "title": "War and Peace",
-        "author": "Leo Tolstoy",
-        "isbn": "9780199232765",
-        "published_year": 1869,
-        "copies_available": 3,
-    },
-    8: {
-        "title": "The Hobbit",
-        "author": "J.R.R. Tolkien",
-        "isbn": "9780547928227",
-        "published_year": 1937,
-        "copies_available": 5,
-    },
-    9: {
-        "title": "Brave New World",
-        "author": "Aldous Huxley",
-        "isbn": "9780060850524",
-        "published_year": 1932,
-        "copies_available": 4,
-    },
-    10: {
-        "title": "Crime and Punishment",
-        "author": "Fyodor Dostoevsky",
-        "isbn": "9780486415871",
-        "published_year": 1866,
-        "copies_available": 2,
-    },
-    11: {
-        "title": "The Lord of the Rings",
-        "author": "J.R.R. Tolkien",
-        "isbn": "9780261102385",
-        "published_year": 1954,
-        "copies_available": 3,
-    },
-    12: {
-        "title": "Harry Potter and the Philosopher's Stone",
-        "author": "J.K. Rowling",
-        "isbn": "9780747532699",
-        "published_year": 1997,
-        "copies_available": 7,
-    },
-}
-
 class BookModel(BaseModel):
-    title: str
-    author: str
-    isbn: str 
-    published_year: int
-    copies_available: int
+    title: str | None = None
+    author: str | None = None
+    isbn: str | None = None
+    published_year: int | None = None
+    available_copies: int | None = None
 
-@app.get("/", response_model=dict, status_code=200)
+def load_book_db():
+    books = load_books()
+    return {book["id"]: book for book in books}
+
+book_db = load_book_db()
+
+@app.get("/", response_model=dict, status_code=200, description="Get all books")
 async def get_all_books():
     return book_db
 
-@app.post("/", response_model=BookModel, status_code=201)
+@app.post("/", response_model=BookModel, status_code=201, description="Add a new book")
 async def add_book(book: BookModel):
     for existing in book_db.values():
         if existing.get("isbn") == book.isbn:
-            raise HTTPException(status_code=409, detail="Book already exists")
+            raise HTTPException(status_code=409, detail="Conflict")
 
     new_id = max(book_db.keys()) + 1 if book_db else 1
     book_db[new_id] = book.model_dump()
+
+    rows = [
+        f"{bid}|{b['title']}|{b['author']}|{b['isbn']}|{b['published_year']}|{b['available_copies']}"
+        for bid, b in book_db.items()
+    ]
+    write_records(BOOKS_FILE, rows)
+
     return book_db[new_id]
 
-@app.get("/{book_id}", response_model=BookModel, status_code=200)
-async def get_book_by_id(
-    book_id: int = Path(..., description="The ID of the book to retrieve")
-):
+@app.get("/{book_id}", response_model=BookModel, status_code=200, description="Get a book by ID")
+async def get_book_by_id(book_id: int = Path(..., description="The ID of the book to retrieve")):
     if book_id not in book_db:
-        raise HTTPException(status_code=404, detail="Book not found")
+        raise HTTPException(status_code=404, detail="Not Found")
     return book_db[book_id]
 
-@app.put("/{book_id}", response_model=BookModel, status_code=200)
-async def update_book(
-    book: BookModel, book_id: int = Path(..., description="The ID of the book to update")
-):
+@app.put("/{book_id}", response_model=BookModel, status_code=200, description="Update a book by ID")
+async def update_book(book: BookModel, book_id: int = Path(..., description="The ID of the book to update")):
     if book_id not in book_db:
-        raise HTTPException(status_code=404, detail="Book not found")
-    book_db[book_id] = book.model_dump()
-    return book_db[book_id]
+        raise HTTPException(status_code=404, detail="Not Found")
 
-@app.delete("/{book_id}", status_code=204)
-async def delete_book(
-    book_id: int = Path(..., description="The ID of the book to delete")
-):
+    stored = book_db[book_id]
+    stored["title"] = book.title or stored["title"]
+    stored["author"] = book.author or stored["author"]
+    stored["isbn"] = book.isbn or stored["isbn"]
+    stored["published_year"] = book.published_year or stored["published_year"]
+    stored["available_copies"] = book.available_copies or stored["available_copies"]
+
+    rows = [
+        f"{bid}|{b['title']}|{b['author']}|{b['isbn']}|{b['published_year']}|{b['available_copies']}"
+        for bid, b in book_db.items()
+    ]
+    write_records(BOOKS_FILE, rows)
+
+    return stored
+
+@app.delete("/{book_id}", status_code=204, description="Delete a book by ID")
+async def delete_book(book_id: int = Path(..., description="The ID of the book to delete")):
     if book_id not in book_db:
-        raise HTTPException(status_code=404, detail="Book not found")
+        raise HTTPException(status_code=404, detail="Not Found")
+
     del book_db[book_id]
+
+    rows = [
+        f"{bid}|{b['title']}|{b['author']}|{b['isbn']}|{b['published_year']}|{b['available_copies']}"
+        for bid, b in book_db.items()
+    ]
+    write_records(BOOKS_FILE, rows)
+
     return None

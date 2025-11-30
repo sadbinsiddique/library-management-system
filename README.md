@@ -11,56 +11,79 @@ A comprehensive API service for Library Management System with Book Management, 
 
 ## Entity
 
+- User
 - Book
-- Member
+- Borrow
 
 ## API Feature
 
 |  Name | Feature 1 | Feature 2 | Feature 3 | Feature 4 | Feature 5 |
 | --- | --- | --- | --- | --- | --- |
-| [Book Management](http://127.0.0.1:8000/book/docs) | Add  book | Update book | Delete book | Show all books | Search book by keyword |
-| User Management | Add  User | Update User | Delete User | Show all User | Search User by name |
-| Borrow & Return System | Borrow book | Return book | Track which member borrowed which book | List all borrowed books | Check if a book is available |
-| Reports & Admin | Overdue books | Most borrowed book | Borrowing history | Generate member receipt (file-based) | Admin login authentication |
+| [Book Management](http://127.0.0.1:8000/book/docs) | Add  book | Update book | Delete book | List Books | Search book by Id |
+| [User Management](http://127.0.0.1:8000/user/docs) | Add  User | Update User | Delete User | List Users | Search User by Id |
+| [Borrow & Return System](http://127.0.0.1:8000/borrow/docs) | Borrow book | Return book | Track Users Borrowed Books | List all borrowed books | Check book availability |
+| [Reports & Admin](http://127.0.0.1:8000/admin/docs) | View Complete System Report | View Summary Statistics | View Overdue Books | View Most Borrowed Books | View User-Specific Borrowing History |
 
 ## Services
 
-### 1. Virtual Enviroment
+### 1. Virtual Environment
 
-```bash
+Create the virtual environment:
+
+```cmd
+python -m venv .venv
+```
+
+Activate
+
+```cmd
 .venv\Scripts\activate
 ```
 
-### 2. Server
+### 2. Install the dependencies
 
-```bash
+```cmd
+pip install -r requirements.txt
+```
+
+### 3. Server
+
+```cmd
 python main.py
 ```
 
-### 3. Client
+### 4. Client
 
-```bash
-python api_client.py
+```cmd
+python client/client.py
 ```
 
-## Project Tree
+### 5. Build Single EXE (Windows)
 
-```bash
-library-management-system
-│    │
-│    ├──server
-│    │    ├───api_book_management
-│    │    ├───api_user_management
-│    │    ├───api_borrow_return_system
-│    │    ├───api_report_admin_system
-│    │    └───app
-│    │
-│    └───client
-│         ├───book_management
-│         ├───user_management
-│         ├───borrow_return_system
-│         ├───report_admin_system
-│         └───client
-│    
-└───main
+Build a one-file Windows executable with PyInstaller.
+
+Prerequisites:
+
+- Python on PATH
+- Dependencies installed: `pip install -r requirements.txt`
+
+Quick build (cmd.exe):
+
+```cmd
+build.bat
 ```
+
+This creates `dist\library-management-system.exe`.
+
+Manual command if preferred:
+
+```cmd
+pip install pyinstaller
+pyinstaller --noconfirm --clean --onefile --name library-management-system --add-data "database;database" main.py
+```
+
+Notes:
+
+- Data files from `database/` are bundled and discovered at runtime (handled in `helpers/paths.py`).
+- Uvicorn reload is disabled inside the EXE to avoid watcher/spawn issues.
+- When running as an EXE, data is stored under `%LOCALAPPDATA%\library-management-system\database` so changes persist across runs.
