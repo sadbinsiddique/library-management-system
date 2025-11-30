@@ -25,7 +25,7 @@ class AdminClient:
         return self._request('GET', '/reports/most-borrowed')
     
     def get_borrowing_history(self, user_id=None):
-        params = {'user_id': user_id} if user_id else {}
+        params = {'user_id': user_id} if user_id else None
         return self._request('GET', '/reports/history', params=params)
 
 def print_summary(summary):
@@ -44,7 +44,7 @@ def print_books_report(books):
         return
     
     for book in books:
-        print(f"Book ID: {book.get('id')} Title: {book.get('title')} Author: {book.get('author')} ISBN: {book.get('isbn')} Published Year: {book.get('published_year')} Available Copies: {book.get('available_copies')}")
+        print(f"Book ID: {book.get('id')} | Title: {book.get('title')} | Author: {book.get('author')} | ISBN: {book.get('isbn')} | Published Year: {book.get('published_year')} | Available Copies: {book.get('available_copies')}")
         
 
 def print_users_report(users):
@@ -54,7 +54,7 @@ def print_users_report(users):
         return
     
     for user in users:
-        print(f"User ID: {user.get('id')} Username: {user.get('username')} Full Name: {user.get('full_name')} Email: {user.get('email')}")
+        print(f"User ID: {user.get('id')} | Username: {user.get('username')} | Full Name: {user.get('full_name')} | Email: {user.get('email')}")
 
 def print_borrows_report(borrows):
     print("BORROWS REPORT".center(60))
@@ -63,7 +63,7 @@ def print_borrows_report(borrows):
         return
     
     for borrow in borrows:
-        print(f"Borrow ID: {borrow.get('borrow_id')} User ID: {borrow.get('user_id')} Book ID: {borrow.get('book_id')} Borrow Date: {borrow.get('borrow_date')} Due Date: {borrow.get('due_date')} Return Date: {borrow.get('return_date') or 'Not returned yet'} Status: {borrow.get('status')}")
+        print(f"Borrow ID: {borrow.get('borrow_id')} | User ID: {borrow.get('user_id')} | Book ID: {borrow.get('book_id')} | Borrow Date: {borrow.get('borrow_date')} | Due Date: {borrow.get('due_date')} | Return Date: {borrow.get('return_date') or 'Not returned yet'} | Status: {borrow.get('status')}")
 
 def print_overdue_report(overdue_books):
     print("OVERDUE BOOKS REPORT".center(60))
@@ -72,7 +72,7 @@ def print_overdue_report(overdue_books):
         return
     
     for item in overdue_books:
-        print(f"Borrow ID: {item.get('borrow_id')} User: {item.get('username')} (ID: {item.get('user_id')}) Book: {item.get('book_title')} (ID: {item.get('book_id')}) Due Date: {item.get('due_date')} Days Overdue: {item.get('days_overdue')}")
+        print(f"Borrow ID: {item.get('borrow_id')} | User: {item.get('username')} (ID: {item.get('user_id')}) | Book: {item.get('book_title')} (ID: {item.get('book_id')}) | Due Date: {item.get('due_date')} | Days Overdue: {item.get('days_overdue')}")
 
 def print_most_borrowed_report(most_borrowed):
     print("MOST BORROWED BOOKS REPORT".center(60))
@@ -81,7 +81,7 @@ def print_most_borrowed_report(most_borrowed):
         return
     
     for idx, item in enumerate(most_borrowed, 1):
-        print(f"{idx}. {item.get('title')} Author: {item.get('author')} Book ID: {item.get('book_id')} Times Borrowed: {item.get('times_borrowed')}")
+        print(f"{idx}. {item.get('title')} | Author: {item.get('author')} | Book ID: {item.get('book_id')} | Times Borrowed: {item.get('times_borrowed')}")
 
 def print_borrowing_history(history):
     print("BORROWING HISTORY REPORT".center(60))
@@ -90,7 +90,7 @@ def print_borrowing_history(history):
         return
     
     for item in history:
-        print(f"Borrow ID: {item.get('borrow_id')} User: {item.get('username')} (ID: {item.get('user_id')}) Book: {item.get('book_title')} (ID: {item.get('book_id')}) Borrow Date: {item.get('borrow_date')} Due Date: {item.get('due_date')} Return Date: {item.get('return_date') or 'Not returned yet'} Status: {item.get('status')}")
+        print(f"Borrow ID: {item.get('borrow_id')} | User: {item.get('username')} (ID: {item.get('user_id')}) | Book: {item.get('book_title')} (ID: {item.get('book_id')}) | Borrow Date: {item.get('borrow_date')} | Due Date: {item.get('due_date')} | Return Date: {item.get('return_date') or 'Not returned yet'} | Status: {item.get('status')}")
 
 def print_full_report(report_data):
     if 'summary' in report_data:
