@@ -1,4 +1,3 @@
-# file: client/book_management.py
 import requests
 
 class BookManagementClient:

@@ -1,4 +1,3 @@
-# file: client/user_management.py
 import requests
 
 class UserManagementClient:

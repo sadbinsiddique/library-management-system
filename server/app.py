@@ -1,9 +1,8 @@
-# file: server/app.py
 from fastapi import FastAPI
-from .api_book_management import app as book_management # relative import
-from .api_user_management import app as user_management # relative import
-from .api_borrow_return import app as borrow_return # relative import
-from .api_admin import app as admin # relative import
+from .api_book_management import app as book_management 
+from .api_user_management import app as user_management 
+from .api_borrow_return import app as borrow_return 
+from .api_admin import app as admin 
 
 app = FastAPI(
     title="Library Management System",

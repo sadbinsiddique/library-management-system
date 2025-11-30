@@ -1,4 +1,3 @@
-# file: server/api_user_management.py
 from fastapi import FastAPI, Query, Path, HTTPException
 from pydantic import BaseModel
 from helpers.paths import USERS_FILE
@@ -18,12 +17,10 @@ def load_user_db():
 
 user_db = load_user_db()
 
-# ___________________________________________________________________________________________________________
 @app.get("/", response_model=dict, status_code=200, description="Get all users")
 async def get_all_users():
     return user_db
 
-# ___________________________________________________________________________________________________________
 @app.post("/", response_model=UserModel, status_code=201, description="Add a new user")
 async def add_user(user: UserModel):
     if not all([user.username, user.full_name, user.email]):
@@ -41,14 +38,12 @@ async def add_user(user: UserModel):
 
     return user_db[new_id]
 
-# ___________________________________________________________________________________________________________
 @app.get("/{user_id}", response_model=UserModel, status_code=200, description="Get a user by ID")
 async def get_user_by_id(user_id: int = Path(..., description="The ID of the user to retrieve")):
     if user_id not in user_db:
         raise HTTPException(status_code=404, detail="Not Found")
     return user_db[user_id]
 
-# ___________________________________________________________________________________________________________
 @app.put("/{user_id}", response_model=UserModel, status_code=200, description="Update a user by ID")
 async def update_user(user_id: int, user: UserModel):
     if user_id not in user_db:
@@ -64,7 +59,6 @@ async def update_user(user_id: int, user: UserModel):
 
     return stored
 
-# ___________________________________________________________________________________________________________
 @app.delete("/{user_id}", status_code=204, description="Delete a user by ID")
 async def delete_user(user_id: int):
     if user_id not in user_db:

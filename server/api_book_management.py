@@ -1,4 +1,3 @@
-# file: server/api_book_management.py
 from fastapi import FastAPI, Query, Path, HTTPException
 from pydantic import BaseModel
 from helpers.paths import BOOKS_FILE

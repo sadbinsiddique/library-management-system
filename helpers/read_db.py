@@ -1,4 +1,3 @@
-# file: helpers/read_db.py
 from .paths import BOOKS_FILE, USERS_FILE, BORROWS_FILE
 
 def _read_lines(path: str):

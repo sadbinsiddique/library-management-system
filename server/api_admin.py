@@ -1,5 +1,3 @@
-# file: server/api_admin.py
-
 from fastapi import FastAPI, HTTPException
 from helpers.read_db import load_books, load_users, load_borrows
 from datetime import datetime
@@ -65,7 +63,7 @@ def get_most_borrowed_books():
     sorted_books = sorted(borrow_count.items(), key=lambda x: x[1], reverse=True)
     
     result = []
-    for book_id, count in sorted_books[:10]:  # Top 10 books
+    for book_id, count in sorted_books[:10]: 
         book = books_dict.get(book_id, {})
         result.append({
             "book_id": book_id,

@@ -1,4 +1,3 @@
-# file: helpers/write_db.py
 def write_records(path: str, rows: list[str]):
     with open(path, "w", encoding="utf-8") as file:
         for row in rows:

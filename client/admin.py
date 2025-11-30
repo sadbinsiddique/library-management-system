@@ -1,4 +1,3 @@
-# file: client/admin.py
 import requests
 
 class AdminClient:

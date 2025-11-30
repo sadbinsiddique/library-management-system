@@ -1,4 +1,3 @@
-# file: client/borrow_return.py
 import requests
 
 class BorrowReturnClient:

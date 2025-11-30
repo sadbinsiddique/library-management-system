@@ -1,4 +1,3 @@
-# file: client/client.py
 import os
 from book_management import BookManagementClient, print_book
 from user_management import UserManagementClient, print_user

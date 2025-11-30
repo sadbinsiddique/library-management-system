@@ -1,4 +1,3 @@
-# file: server/api_borrow_return.py
 from fastapi import FastAPI, HTTPException, Path
 from pydantic import BaseModel
 from datetime import datetime, timedelta
