@@ -17,12 +17,7 @@ class UserManagementClient:
             raise Exception(f"Request failed: {e}")
 
     def add_user(self, username, full_name, email):
-        return self._request('POST','/', 
-            json={
-                'username': username, 
-                'full_name': full_name, 
-                'email': email}
-            )
+        return self._request('POST','/', json={'username': username, 'full_name': full_name, 'email': email})
 
     def get_user(self, user_id):
         return self._request('GET', f'/{user_id}')
@@ -39,7 +34,4 @@ class UserManagementClient:
         return self._request('GET','/')
 
 def print_user(user, user_id=None):
-    if user_id: 
-        print(f"ID: {user_id}, Username: {user.get('username')}, Full Name: {user.get('full_name')}, Email: {user.get('email')}")
-    else:
-        print("No user data available.")
+    print(f"ID: {user_id} | Username: {user.get('username')} | Full Name: {user.get('full_name')} | Email: {user.get('email')}")
