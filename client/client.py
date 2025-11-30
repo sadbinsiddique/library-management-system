@@ -598,7 +598,7 @@ def admin_reports_menu():
             input("Press Enter to continue... ")
             
         except KeyboardInterrupt:
-            print("nOperation cancelled.")
+            print("Operation cancelled.")
             input("Press Enter to continue... ")
         except Exception as e:
             print(f"Unexpected error: {e}")
