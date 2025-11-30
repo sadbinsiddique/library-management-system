@@ -17,47 +17,29 @@ class UserManagementClient:
             raise Exception(f"Request failed: {e}")
 
     def add_user(self, username, full_name, email):
-        return self._request(
-            'POST',
-            '/', 
+        return self._request('POST','/', 
             json={
                 'username': username, 
                 'full_name': full_name, 
-                'email': email
-        })
+                'email': email}
+            )
 
     def get_user(self, user_id):
-        return self._request(
-            'GET', 
-            f'/{user_id}'
-        )
+        return self._request('GET', f'/{user_id}')
 
     def update_user(self, user_id, **fields):
         update_data = {k: v for k, v in fields.items() if v is not None}
         
-        return self._request(
-            'PUT', 
-            f'/{user_id}',
-            json = update_data
-        )
+        return self._request('PUT', f'/{user_id}',json = update_data)
 
     def delete_user(self, user_id):
-        self._request(
-            'DELETE', 
-            f'/{user_id}'
-        )
+        self._request('DELETE', f'/{user_id}')
 
     def list_users(self):
-        return self._request(
-            'GET',
-            '/'
-        )
+        return self._request('GET','/')
 
 def print_user(user, user_id=None):
-    print("\n--- User Info ---")
     if user_id: 
-        print(f"ID: {user_id}")
-
-    print(f"Username: {user.get('username')}")
-    print(f"Full Name: {user.get('full_name')}")
-    print(f"Email: {user.get('email')}\n")
+        print(f"ID: {user_id}, Username: {user.get('username')}, Full Name: {user.get('full_name')}, Email: {user.get('email')}")
+    else:
+        print("No user data available.")

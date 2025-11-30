@@ -29,121 +29,68 @@ class AdminClient:
         return self._request('GET', '/reports/history', params=params)
 
 def print_summary(summary):
-    print("\n" + "="*60)
     print("LIBRARY MANAGEMENT SYSTEM - SUMMARY REPORT".center(60))
-    print("="*60)
     print(f"Total Books: {summary.get('total_books')}")
     print(f"Total Users: {summary.get('total_users')}")
     print(f"Total Borrows: {summary.get('total_borrows')}")
     print(f"Active Borrows: {summary.get('active_borrows')}")
     print(f"Returned Borrows: {summary.get('returned_borrows')}")
     print(f"Total Copies Available: {summary.get('total_copies_available', 'N/A')}")
-    print("="*60 + "\n")
 
 def print_books_report(books):
-    print("\n" + "-"*60)
     print("BOOKS REPORT".center(60))
-    print("-"*60)
     if not books:
-        print("No books found in the system.\n")
+        print("No books found in the system.")
         return
     
     for book in books:
-        print(f"\nBook ID: {book.get('id')}")
-        print(f"  Title: {book.get('title')}")
-        print(f"  Author: {book.get('author')}")
-        print(f"  ISBN: {book.get('isbn')}")
-        print(f"  Published Year: {book.get('published_year')}")
-        print(f"  Available Copies: {book.get('copies_available')}")
-        print("-" * 40)
-    print()
+        print(f"Book ID: {book.get('id')} Title: {book.get('title')} Author: {book.get('author')} ISBN: {book.get('isbn')} Published Year: {book.get('published_year')} Available Copies: {book.get('available_copies')}")
+        
 
 def print_users_report(users):
-    print("\n" + "-"*60)
     print("USERS REPORT".center(60))
-    print("-"*60)
     if not users:
-        print("No users found in the system.\n")
+        print("No users found in the system.")
         return
     
     for user in users:
-        print(f"\nUser ID: {user.get('id')}")
-        print(f"  Username: {user.get('username')}")
-        print(f"  Full Name: {user.get('full_name')}")
-        print(f"  Email: {user.get('email')}")
-        print("-" * 40)
-    print()
+        print(f"User ID: {user.get('id')} Username: {user.get('username')} Full Name: {user.get('full_name')} Email: {user.get('email')}")
 
 def print_borrows_report(borrows):
-    print("\n" + "-"*60)
     print("BORROWS REPORT".center(60))
-    print("-"*60)
     if not borrows:
-        print("No borrow records found in the system.\n")
+        print("No borrow records found in the system.")
         return
     
     for borrow in borrows:
-        print(f"\nBorrow ID: {borrow.get('borrow_id')}")
-        print(f"  User ID: {borrow.get('user_id')}")
-        print(f"  Book ID: {borrow.get('book_id')}")
-        print(f"  Borrow Date: {borrow.get('borrow_date')}")
-        print(f"  Due Date: {borrow.get('due_date')}")
-        print(f"  Return Date: {borrow.get('return_date') or 'Not returned yet'}")
-        print(f"  Status: {borrow.get('status')}")
-        print("-" * 40)
-    print()
+        print(f"Borrow ID: {borrow.get('borrow_id')} User ID: {borrow.get('user_id')} Book ID: {borrow.get('book_id')} Borrow Date: {borrow.get('borrow_date')} Due Date: {borrow.get('due_date')} Return Date: {borrow.get('return_date') or 'Not returned yet'} Status: {borrow.get('status')}")
 
 def print_overdue_report(overdue_books):
-    print("\n" + "-"*60)
     print("OVERDUE BOOKS REPORT".center(60))
-    print("-"*60)
     if not overdue_books:
-        print("No overdue books found.\n")
+        print("No overdue books found.")
         return
     
     for item in overdue_books:
-        print(f"\nBorrow ID: {item.get('borrow_id')}")
-        print(f"  User: {item.get('username')} (ID: {item.get('user_id')})")
-        print(f"  Book: {item.get('book_title')} (ID: {item.get('book_id')})")
-        print(f"  Due Date: {item.get('due_date')}")
-        print(f"  Days Overdue: {item.get('days_overdue')}")
-        print("-" * 40)
-    print()
+        print(f"Borrow ID: {item.get('borrow_id')} User: {item.get('username')} (ID: {item.get('user_id')}) Book: {item.get('book_title')} (ID: {item.get('book_id')}) Due Date: {item.get('due_date')} Days Overdue: {item.get('days_overdue')}")
 
 def print_most_borrowed_report(most_borrowed):
-    print("\n" + "-"*60)
     print("MOST BORROWED BOOKS REPORT".center(60))
-    print("-"*60)
     if not most_borrowed:
-        print("No borrowing data available.\n")
+        print("No borrowing data available.")
         return
     
     for idx, item in enumerate(most_borrowed, 1):
-        print(f"\n{idx}. {item.get('title')}")
-        print(f"   Author: {item.get('author')}")
-        print(f"   Book ID: {item.get('book_id')}")
-        print(f"   Times Borrowed: {item.get('times_borrowed')}")
-        print("-" * 40)
-    print()
+        print(f"{idx}. {item.get('title')} Author: {item.get('author')} Book ID: {item.get('book_id')} Times Borrowed: {item.get('times_borrowed')}")
 
 def print_borrowing_history(history):
-    print("\n" + "-"*60)
     print("BORROWING HISTORY REPORT".center(60))
-    print("-"*60)
     if not history:
-        print("No borrowing history available.\n")
+        print("No borrowing history available.")
         return
     
     for item in history:
-        print(f"\nBorrow ID: {item.get('borrow_id')}")
-        print(f"  User: {item.get('username')} (ID: {item.get('user_id')})")
-        print(f"  Book: {item.get('book_title')} (ID: {item.get('book_id')})")
-        print(f"  Borrow Date: {item.get('borrow_date')}")
-        print(f"  Due Date: {item.get('due_date')}")
-        print(f"  Return Date: {item.get('return_date') or 'Not returned yet'}")
-        print(f"  Status: {item.get('status')}")
-        print("-" * 40)
-    print()
+        print(f"Borrow ID: {item.get('borrow_id')} User: {item.get('username')} (ID: {item.get('user_id')}) Book: {item.get('book_title')} (ID: {item.get('book_id')}) Borrow Date: {item.get('borrow_date')} Due Date: {item.get('due_date')} Return Date: {item.get('return_date') or 'Not returned yet'} Status: {item.get('status')}")
 
 def print_full_report(report_data):
     if 'summary' in report_data:
