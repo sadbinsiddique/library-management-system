@@ -144,8 +144,8 @@ def book_management_menu():
                     title = prompt("Title: ")
                     author = prompt("Author: ")
                     isbn = prompt("ISBN: ")
-                    published_year = prompt("Year: ")
-                    copies_available = prompt("Copies: ")
+                    published_year = prompt("Year: ", int) # type: ignore
+                    copies_available = prompt("Copies: ", int) # type: ignore
             
                     
                     if not any([title, author, isbn, published_year is not None, copies_available is not None]):
@@ -158,7 +158,7 @@ def book_management_menu():
                         author=author,
                         isbn=isbn,
                         published_year=published_year,
-                        copies_available=copies_available
+                        available_copies=copies_available
                     )
                     print("\n------- Book Updated Successfully! ------ \n")
                     print_book(updated, book_id)

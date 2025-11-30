@@ -47,4 +47,5 @@
 47|Afterglow Harbor|Julian Ness|9780399592521|2009|2
 48|Winterline Equation|Maris Chen|9780451492314|2014|4
 49|Museum of Tides|Ivo Sterling|9780062315011|2001|3
-50|Pale Meridian|Silas Ocampo|9780525429763|1995|4
+50|pla merit|silas|7418/5296|1999|999999
+51|123|Akij|1254863563|2000|5

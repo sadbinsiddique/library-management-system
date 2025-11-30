@@ -11,8 +11,9 @@ A comprehensive API service for Library Management System with Book Management, 
 
 ## Entity
 
+- User
 - Book
-- Member
+- Borrow
 
 ## API Feature
 
